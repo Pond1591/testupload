@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import EXIF from 'exif-js';
+import React, { useState } from "react";
+import EXIF from "exif-js";
 
 const Upload = () => {
-  const [imageURL, setImageURL] = useState('');
-  const [imageName, setImageName] = useState('');
+  const [imageURL, setImageURL] = useState("");
+  const [imageName, setImageName] = useState("");
   const [location, setLocation] = useState(null);
 
   const handleImageChange = (event) => {
@@ -14,8 +14,8 @@ const Upload = () => {
 
     // Read EXIF data and get GPS coordinates
     EXIF.getData(file, function () {
-      const latitude = EXIF.getTag(this, 'GPSLatitude');
-      const longitude = EXIF.getTag(this, 'GPSLongitude');
+      const latitude = EXIF.getTag(this, "GPSLatitude");
+      const longitude = EXIF.getTag(this, "GPSLongitude");
 
       if (latitude && longitude) {
         const latDegrees = latitude[0];
@@ -39,10 +39,14 @@ const Upload = () => {
   return (
     <div>
       <h1>Upload an Image</h1>
-      <input type="file" accept="image/*" capture="camera" onChange={handleImageChange} />
+      <input type="file" accept="image/*" onChange={handleImageChange} />
       {imageURL && (
         <div>
-          <img src={imageURL} alt="Uploaded Image" style={{ maxWidth: '300px' }} />
+          <img
+            src={imageURL}
+            alt="Uploaded Image"
+            style={{ maxWidth: "300px" }}
+          />
           <p>Image Location: {imageName}</p>
           {location && (
             <p>
