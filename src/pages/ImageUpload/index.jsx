@@ -1,62 +1,54 @@
-import React, { useState } from "react";
-import EXIF from "exif-js";
+import React, { useState } from 'react';
+import EXIF from 'exif-js';
 
-const Upload = () => {
-  const [imageURL, setImageURL] = useState("");
-  const [imageName, setImageName] = useState("");
+const ImageUploadWithExif = () => {
+  const [selectedImage, setSelectedImage] = useState(null);
   const [location, setLocation] = useState(null);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
-    const imageURL = URL.createObjectURL(file);
-    setImageURL(imageURL);
-    setImageName(file.name);
+    setSelectedImage(file);
 
-    // Read EXIF data and get GPS coordinates
+    // Read EXIF data from the selected image
     EXIF.getData(file, function () {
-      const latitude = EXIF.getTag(this, "GPSLatitude");
-      const longitude = EXIF.getTag(this, "GPSLongitude");
+      const lat = EXIF.getTag(this, 'GPSLatitude');
+      const lon = EXIF.getTag(this, 'GPSLongitude');
 
-      if (latitude && longitude) {
-        const latDegrees = latitude[0];
-        const latMinutes = latitude[1];
-        const latSeconds = latitude[2];
-
-        const lonDegrees = longitude[0];
-        const lonMinutes = longitude[1];
-        const lonSeconds = longitude[2];
-
-        const latitudeValue = latDegrees + latMinutes / 60 + latSeconds / 3600;
-        const longitudeValue = lonDegrees + lonMinutes / 60 + lonSeconds / 3600;
-
-        setLocation({ latitude: latitudeValue, longitude: longitudeValue });
+      if (lat && lon) {
+        setLocation({
+          latitude: convertDMSToDD(lat),
+          longitude: convertDMSToDD(lon),
+        });
       } else {
         setLocation(null);
       }
     });
   };
 
+  const convertDMSToDD = (dmsArray) => {
+    const degrees = dmsArray[0];
+    const minutes = dmsArray[1];
+    const seconds = dmsArray[2];
+
+    return degrees + minutes / 60 + seconds / 3600;
+  };
+
   return (
     <div>
-      <h1>Upload an Image</h1>
-      <input type="file" accept="image/*" onChange={handleImageChange} />
-      {imageURL && (
-        <div>
-          <img
-            src={imageURL}
-            alt="Uploaded Image"
-            style={{ maxWidth: "300px" }}
-          />
-          <p>Image Location: {imageName}</p>
-          {location && (
-            <p>
-              GPS Coordinates: {location.latitude}, {location.longitude}
-            </p>
-          )}
-        </div>
-      )}
+      <h2>Image Upload with EXIF</h2>
+      <form>
+        <input type="file" accept="image/*" onChange={handleImageChange} />
+        {selectedImage && <img src={URL.createObjectURL(selectedImage)} alt="Selected" />}
+        {location ? (
+          <p>
+            Latitude: {location.latitude}, Longitude: {location.longitude}
+          </p>
+        ) : (
+          <p>No location data found in the image EXIF.</p>
+        )}
+      </form>
     </div>
   );
 };
 
-export default Upload;
+export default ImageUploadWithExif;
